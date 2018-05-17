@@ -1,0 +1,23 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: docker.io/redjays/c7:docker-ce
+    working_directory: /project
+    environment:
+    steps:
+      - checkout
+      - run:
+          name: replace repo file
+          command: cp config/yum/centos-7/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d && yum clean all
+      - run:
+          name: install docker prereqs
+          command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo && yum -y install docker-ce && yum -y install epel-release && yum -y install debootstrap perl which dpkg
+      - setup_remote_docker
+      - run:
+          name: build dind
+          command: bash -x build.sh
+      - run:
+          name: push dind
+          command: bash -x publish.sh
